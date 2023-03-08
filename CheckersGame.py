@@ -1,22 +1,39 @@
 class InvalidPlayer(Exception):
+    """
+    Exception to raise when a player name or checker color is incorrect
+    """
     pass
 
 class OutOfTurn(Exception):
+    """
+    Exception to raise when player attempts a move out of turn
+    """
     pass
 
 class InvalidSquare(Exception):
+    """
+    Exception to raise when player attempts to move a piece from a square that isn't their piece or doesn't have a piece
+    """
     pass
 
 
 class Checkers:
-    def __init__(self, players):
+    """
+    The checkers class will have a method to create the players for the checkers game (This method will create
+    the player class) with parameters for player name and piece color, and a method to play the game, with the
+    parameters player name, starting square, and destination square. The latter two parameters being tuple coordinates
+    which the player will use to determine which piece the player wants to move and where to move it
+    """
+
+    def __init__(self, players: list):
         self._players = players
-        captured_pieces = 0
 
-
-    def create_player(self, player_name, piece_color):
+    def create_player(self, player_name: str, piece_color: str):
         """
-        This is a function which creates a player object for the checkers game.
+        A function which creates a player object for the checkers game. There must be only two players per game with
+        checkers pieces being either black or white. The player who chooses black will have the first turn
+        :param player_name: must be at least one discernible character, must be unique to the player
+        :param piece_color: must be "White" or "Black"
         """
         for players in self._players:
             if player_name == self._players:
@@ -27,55 +44,84 @@ class Checkers:
         if piece_color != "White" or piece_color != "Black":
             raise InvalidPlayer("Your piece color must be Black or White")
 
-    def play_game(self, player_name, starting_square_location, destination_square_location):
+        self._players.append(("player_name", "piece_color"))
+        return Player(player_name, piece_color)
 
-        if player.turn == False:
+    def play_game(self, player_name: str, starting_square_location: tuple, destination_square_location: tuple):
+        """
+        This method will allow the players to play the game
+        :param player_name: The unique player name to identify the player making the move
+        :param starting_square_location: The location of the piece the player wishes to move
+        :param destination_square_location: The location the player wants to move their piece to
+        :return:
+        """
+
+        if self._player.turn == False:
             raise OutOfTurn("It's not your turn!")
 
         if piece in starting_square_location is not player.piece: # does not belong to player
             raise InvalidSquare("The piece in this square isn't yours")
 
-    def print_capture_pieces(self):
-        return captured_pieces
+    def print_captured_pieces(self):
+        """
+        This method will return the amount of pieces the given player has captured
+        """
+        return Player.get_captured_pieces_count
 
     def get_checker_details(self, location: tuple):
-
+        """
+        This method will return information on King or Triple King status for the given checkers piece
+        :param location: a tuple to tell the method where the piece to be checked is located
+        """
         return checker_color  #check color based on player
 
         # needs to return if king or triple king
 
     def print_board(self):
+        """
+        This method will print the entire board as an array to give players a visualization of the current game
+        """
         # print the board as an array
         pass
 
     def game_winner(self):
-        # needs to return the game winner or if ther game is still going return that
+        """
+        This method will either return the winner of the game or if the game hasn't ended yet, it will indicate so
+        """
+        # needs to return the game winner or if the game is still going return that
         pass
 
 
 
 class Player:
+    """
+    This class will create Player objects, of which there are two per game. It will be initialized by the create_player
+    method in the Checkers class. This object will store player information including name, piece color, the number of
+    Kings and Triple Kings, and pieces captured
+    """
 
-    def __init__(self, player_name, checker_color):
+    def __init__(self, player_name, piece_color):
         self._player_name = player_name
-        self._checker_color = checker_color
-        king_count = 0
-        triple_king_count = 0
+        self._piece_color = piece_color
+        self._king_count = 0
+        self._triple_king_count = 0
+        self._captured_pieces = 0
 
     def get_king_count(self):
-        return king_count
-
+        """
+        This method will return the number of Kings the player has on the board, it won't count captured kings
+        """
+        return self._king_count
 
     def get_triple_king_count(self):
-        return triple_king_count
+        """
+        This method will return the number of triple Kings the player has on the board, it won't count captured
+        triple kings
+        """
+        return self._triple_king_count
 
     def get_captured_pieces_count(self):
-        return captured_pieces
-
-
-
-
-
-
-
-
+        """
+        This method will return the number of pieces the given player has captured
+        """
+        return self._captured_pieces
