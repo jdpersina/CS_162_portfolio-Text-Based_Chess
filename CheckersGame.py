@@ -27,6 +27,11 @@ class Checkers:
 
     def __init__(self, players: list = None):
         self._players = players
+        self._board = [
+                [(1,8), (2,8), (3,8), (4,8), (5,8), (6,8), (7,8), (8,8)],
+                [(1,7), (2,7), (3,7), (4,7), ()]
+
+            ]
 
     def create_player(self, player_name: str, piece_color: str):
         """
@@ -82,11 +87,7 @@ class Checkers:
         This method will print the entire board as an array to give players a visualization of the current game
         """
         while Checkers is True:
-            board = [
-                [(1,8), (2,8), (3,8), (4,8), (5,8), (6,8), (7,8), (8,8)],
-                [(1,7), (2,7), (3,7), (4,7)]
 
-            ]
         # print the board as an array
         pass
 
