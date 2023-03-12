@@ -16,6 +16,11 @@ class InvalidSquare(Exception):
     """
     pass
 
+class Piece:
+    def __init__(self, color, location: tuple):
+        self._color = color
+        self._location = location
+        self._condition = 0
 
 class Checkers:
     """
@@ -27,11 +32,24 @@ class Checkers:
 
     def __init__(self, players: list = None):
         self._players = players
+        self.turn_counter = 0
         self._board = [
-                [(1,8), (2,8), (3,8), (4,8), (5,8), (6,8), (7,8), (8,8)],
-                [(1,7), (2,7), (3,7), (4,7), ()]
-
+                [(1, 8), (2, 8), (3, 8), (4, 8), (5, 8), (6, 8), (7, 8), (8, 8)],
+                [(1, 7), (2, 7), (3, 7), (4, 7), (5, 7), (6, 7), (7, 7), (8, 7)],
+                [(1, 6), (2, 6), (3, 6), (4, 6), (5, 6), (6, 6), (7, 6), (8, 6)],
+                [(1, 5), (2, 5), (3, 5), (4, 5), (5, 5), (6, 5), (7, 5), (8, 5)],
+                [(1, 4), (2, 4), (3, 4), (4, 4), (5, 4), (6, 4), (7, 4), (8, 4)],
+                [(1, 3), (2, 3), (3, 3), (4, 3), (5, 3), (6, 3), (7, 3), (8, 3)],
+                [(1, 2), (2, 2), (3, 2), (4, 2), (5, 2), (6, 2), (7, 2), (8, 2)],
+                [(1, 1), (2, 1), (3, 1), (4, 1), (5, 1), (6, 1), (7, 1), (8, 1)]
             ]
+
+        # working on board setting, probably won't go here, maybe goes in create player method
+        while self.turn_counter == 0:
+            for rows in self._board:
+                for (x,y) in rows:
+                    if x % 2 == 0 and y <= 3:
+
 
     def create_player(self, player_name: str, piece_color: str):
         """
@@ -46,10 +64,13 @@ class Checkers:
             elif player_name is None:
                 raise InvalidPlayer("You must choose a name")
 
+            if piece_color == self._players:
+                raise InvalidPlayer("The other player has already chosen this color")
+
         if piece_color != "White" or piece_color != "Black":
             raise InvalidPlayer("Your piece color must be Black or White")
 
-        self._players.append(("player_name", "piece_color"))
+        self._players.append(Player(player_name, piece_color))
         return Player(player_name, piece_color)
 
     def play_game(self, player_name: str, starting_square_location: tuple, destination_square_location: tuple):
@@ -110,9 +131,12 @@ class Player:
     def __init__(self, player_name, piece_color):
         self._player_name = player_name
         self._piece_color = piece_color
+        self._pieces = []
         self._king_count = 0
         self._triple_king_count = 0
         self._captured_pieces = 0
+
+    def piece(self,):
 
     def get_king_count(self):
         """
