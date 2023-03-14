@@ -25,7 +25,8 @@ class Piece:
         self._location = location
         self._condition = 0
 
-
+    def return_condition(self):
+        return self._condition
 
 class Checkers:
     """
@@ -50,20 +51,11 @@ class Checkers:
 
         # working on board setting, probably won't go here, maybe goes in create player method
 
+    def append_player_list(self, Player: object):
+        self._players.append(Player)
+
     def return_board(self):
         return self._board
-
-    def create_pieces(self, color):
-        # Setting the board pieces
-        piece_list = []
-        row = [1, 2, 3, 4, 5, 6, 7, 8]
-        if color == "Black":
-            for n in row[::2]:
-                piece_list.append(Piece(color, (n, 3)))
-                piece_list.append(Piece(color, (n, 1)))
-            for n in row[1::2]:
-                piece_list.append(Piece(color, (n, 2)))
-
 
     def create_player(self, player_name: str, piece_color: str):
         """
@@ -84,7 +76,6 @@ class Checkers:
         #if piece_color is not 'White' or piece_color is not 'Black':
             #raise InvalidPlayer("Your piece color must be Black or White")
 
-        self.create_pieces(piece_color)
         self._players.append(Player(player_name, piece_color))
         return Player(player_name, piece_color)
 
@@ -149,27 +140,42 @@ class Player:
         self._player_name = player_name
         self._piece_color = piece_color
         self._pieces = []
-        self._king_count = 0
-        self._triple_king_count = 0
         self._captured_pieces = 0
 
-    def add_pieces(self, piece: object):
-        self._pieces.append(piece)
+        row = [1, 2, 3, 4, 5, 6, 7, 8]
+        if piece_color == "Black":
+            for n in row[::2]:
+                self._pieces.append(Piece(piece_color, (n, 3)))
+                self._pieces.append(Piece(piece_color, (n, 1)))
+            for n in row[1::2]:
+                self._pieces.append(Piece(piece_color, (n, 2)))
+        if piece_color == "White":
+            for n in row[::2]:
+                self._pieces.append(Piece(piece_color, (n, 7)))
+            for n in row[1::2]:
+                self._pieces.append(Piece(piece_color, (n, 8)))
+                self._pieces.append(Piece(piece_color, (n, 6)))
 
     def get_king_count(self):
         """
         This method will return the number of Kings the player has on the board, it won't count captured kings
         """
-        return self._king_count
-        pass
+        king_count = 0
+        for pieces in self._pieces:
+            if pieces.return_condition() == 1:
+                king_count += 1
+        return king_count
 
     def get_triple_king_count(self):
         """
         This method will return the number of triple Kings the player has on the board, it won't count captured
         triple kings
         """
-        return self._triple_king_count
-        pass
+        trip_king_count = 0
+        for pieces in self._pieces:
+            if pieces.return_condition() == 2:
+                trip_king_count += 1
+        return trip_king_count
 
     def get_captured_pieces_count(self):
         """
@@ -181,3 +187,4 @@ class Player:
 
 game = Checkers()
 p1 = game.create_player("Dan", "Black")
+print(p1.get_king_count())
