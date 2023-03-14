@@ -4,11 +4,13 @@ class InvalidPlayer(Exception):
     """
     pass
 
+
 class OutOfTurn(Exception):
     """
     Exception to raise when player attempts a move out of turn
     """
     pass
+
 
 class InvalidSquare(Exception):
     """
@@ -16,20 +18,12 @@ class InvalidSquare(Exception):
     """
     pass
 
+
 class Piece:
-    def __init__(self, color, location):
+    def __init__(self, color: str, location: tuple):
         self._color = color
         self._location = location
         self._condition = 0
-
-        for i in range(11):
-            if color is "Black":
-                for rows in Checkers.return_board():
-                    for (x, y) in rows:
-                        if x % 2 == 0 and y <= 3:
-                            # need to do this for only the range of x coordinate
-                            x = 1
-                            Piece(color, )
 
 
 
@@ -41,9 +35,8 @@ class Checkers:
     which the player will use to determine which piece the player wants to move and where to move it
     """
 
-    def __init__(self, players: list = None):
-        self._players = players
-        self.turn_counter = 0
+    def __init__(self):
+        self._players = []
         self._board = [
                 [(1, 8), (2, 8), (3, 8), (4, 8), (5, 8), (6, 8), (7, 8), (8, 8)],
                 [(1, 7), (2, 7), (3, 7), (4, 7), (5, 7), (6, 7), (7, 7), (8, 7)],
@@ -56,12 +49,20 @@ class Checkers:
             ]
 
         # working on board setting, probably won't go here, maybe goes in create player method
-        while self.turn_counter == 0:
 
     def return_board(self):
         return self._board
+
     def create_pieces(self, color):
-        return Piece(color)
+        # Setting the board pieces
+        piece_list = []
+        row = [1, 2, 3, 4, 5, 6, 7, 8]
+        if color == "Black":
+            for n in row[::2]:
+                piece_list.append(Piece(color, (n, 3)))
+                piece_list.append(Piece(color, (n, 1)))
+            for n in row[1::2]:
+                piece_list.append(Piece(color, (n, 2)))
 
 
     def create_player(self, player_name: str, piece_color: str):
@@ -72,20 +73,16 @@ class Checkers:
         :param piece_color: must be "White" or "Black"
         """
         for players in self._players:
-            if player_name == self._players:
+            if player_name == players:
                 raise InvalidPlayer("The player names must be unique")
-            elif player_name is == "":
+            elif player_name == "":
                 raise InvalidPlayer("You must choose a name")
 
             if piece_color == self._players:
                 raise InvalidPlayer("The other player has already chosen this color")
 
-        if piece_color != "White" or piece_color != "Black":
-            raise InvalidPlayer("Your piece color must be Black or White")
-
-        for rows in self._board:
-            for (x, y) in rows:
-                if x % 2 == 0 and y <= 3:
+        #if piece_color is not 'White' or piece_color is not 'Black':
+            #raise InvalidPlayer("Your piece color must be Black or White")
 
         self.create_pieces(piece_color)
         self._players.append(Player(player_name, piece_color))
@@ -100,17 +97,19 @@ class Checkers:
         :return:
         """
 
-        if self._player.turn == False:
+        if self._players.turn == False:
             raise OutOfTurn("It's not your turn!")
 
         if piece in starting_square_location is not player.piece: # does not belong to player
             raise InvalidSquare("The piece in this square isn't yours")
+        pass
 
     def print_captured_pieces(self):
         """
         This method will return the amount of pieces the given player has captured
         """
         return Player.get_captured_pieces_count
+        pass
 
     def get_checker_details(self, location: tuple):
         """
@@ -118,6 +117,7 @@ class Checkers:
         :param location: a tuple to tell the method where the piece to be checked is located
         """
         return checker_color  #check color based on player
+        pass
 
         # needs to return if king or triple king
 
@@ -125,7 +125,6 @@ class Checkers:
         """
         This method will print the entire board as an array to give players a visualization of the current game
         """
-        while Checkers is True:
 
         # print the board as an array
         pass
@@ -154,13 +153,15 @@ class Player:
         self._triple_king_count = 0
         self._captured_pieces = 0
 
-    def piece(self,):
+    def add_pieces(self, piece: object):
+        self._pieces.append(piece)
 
     def get_king_count(self):
         """
         This method will return the number of Kings the player has on the board, it won't count captured kings
         """
         return self._king_count
+        pass
 
     def get_triple_king_count(self):
         """
@@ -168,9 +169,15 @@ class Player:
         triple kings
         """
         return self._triple_king_count
+        pass
 
     def get_captured_pieces_count(self):
         """
         This method will return the number of pieces the given player has captured
         """
         return self._captured_pieces
+        pass
+
+
+game = Checkers()
+p1 = game.create_player("Dan", "Black")
