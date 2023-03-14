@@ -17,10 +17,21 @@ class InvalidSquare(Exception):
     pass
 
 class Piece:
-    def __init__(self, color, location: tuple):
+    def __init__(self, color, location):
         self._color = color
         self._location = location
         self._condition = 0
+
+        for i in range(11):
+            if color is "Black":
+                for rows in Checkers.return_board():
+                    for (x, y) in rows:
+                        if x % 2 == 0 and y <= 3:
+                            # need to do this for only the range of x coordinate
+                            x = 1
+                            Piece(color, )
+
+
 
 class Checkers:
     """
@@ -46,9 +57,11 @@ class Checkers:
 
         # working on board setting, probably won't go here, maybe goes in create player method
         while self.turn_counter == 0:
-            for rows in self._board:
-                for (x,y) in rows:
-                    if x % 2 == 0 and y <= 3:
+
+    def return_board(self):
+        return self._board
+    def create_pieces(self, color):
+        return Piece(color)
 
 
     def create_player(self, player_name: str, piece_color: str):
@@ -61,7 +74,7 @@ class Checkers:
         for players in self._players:
             if player_name == self._players:
                 raise InvalidPlayer("The player names must be unique")
-            elif player_name is None:
+            elif player_name is == "":
                 raise InvalidPlayer("You must choose a name")
 
             if piece_color == self._players:
@@ -70,6 +83,11 @@ class Checkers:
         if piece_color != "White" or piece_color != "Black":
             raise InvalidPlayer("Your piece color must be Black or White")
 
+        for rows in self._board:
+            for (x, y) in rows:
+                if x % 2 == 0 and y <= 3:
+
+        self.create_pieces(piece_color)
         self._players.append(Player(player_name, piece_color))
         return Player(player_name, piece_color)
 
