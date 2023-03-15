@@ -25,7 +25,7 @@ class Piece:
         self._location = location
         self._condition = 0
 
-    def return_condition(self):
+    def king_counts(self):
         """
         This method shows whether the piece is normal, king, or a triple king
         """
@@ -37,7 +37,11 @@ class Piece:
         """
         return self._location
 
-    def show_info(self):
+    def return_color(self, location: tuple):
+        return self._color
+
+    def return_condition(self, location: tuple):
+        return self._condition
 
 
 class Checkers:
@@ -61,8 +65,11 @@ class Checkers:
                 [(1, 1), (2, 1), (3, 1), (4, 1), (5, 1), (6, 1), (7, 1), (8, 1)]
             ]
 
-    def append_player_list(self, Player: object):
-        self._players.append(Player)
+    def append_player_list(self, player: object):
+        """
+        This method updates the Checkers object players list with the player objects once created
+        """
+        self._players.append(player)
 
     def return_board(self):
         return self._board
@@ -74,17 +81,25 @@ class Checkers:
         :param player_name: must be at least one discernible character, must be unique to the player
         :param piece_color: must be "White" or "Black"
         """
-        for players in self._players:
-            if player_name == players:
+        # Check to make sure player chose a discernible name
+        if player_name == "":
+            raise InvalidPlayer("You must choose a name")
+        # Check to make sure player chose one of the two allowed piece colors, black or white
+        if piece_color != 'White':
+            if piece_color != 'Black':
+                raise InvalidPlayer("Your piece color must be Black or White")
+
+        # This block compares the second player's name and piece color to the first player's to make sure they're unique
+        for player in self._players:
+
+            first_player_name = player.get_name()
+            first_player_color = player.get_color()
+
+            if first_player_name == player_name:
                 raise InvalidPlayer("The player names must be unique")
-            elif player_name == "":
-                raise InvalidPlayer("You must choose a name")
 
-            if piece_color == self._players:
+            if first_player_color == piece_color:
                 raise InvalidPlayer("The other player has already chosen this color")
-
-        #if piece_color is not 'White' or piece_color is not 'Black':
-            #raise InvalidPlayer("Your piece color must be Black or White")
 
         self._players.append(Player(player_name, piece_color))
         return Player(player_name, piece_color)
@@ -109,12 +124,11 @@ class Checkers:
         """
         This method will return the amount of pieces the given player has captured
         """
-        return Player.get_captured_pieces_count
-        pass
+        return Player.get_captured_pieces_count()
 
     def get_checker_details(self, location: tuple):
         """
-        This method will return information on King or Triple King status for the given checkers piece
+        This method will return information on piece color and King or Triple King status for the given checker piece
         :param location: a tuple to tell the method where the piece to be checked is located
         """
         return checker_color  #check color based on player
@@ -126,7 +140,6 @@ class Checkers:
         """
         This method will print the entire board as an array to give players a visualization of the current game
         """
-
         # print the board as an array
         pass
 
@@ -152,19 +165,28 @@ class Player:
         self._pieces = []
         self._captured_pieces = 0
 
+        # This block of code populates the checkers board with the correct starting positions per piece color
+        pieces_list = self._pieces
         row = [1, 2, 3, 4, 5, 6, 7, 8]
         if piece_color == "Black":
-            for n in row[::2]:
-                self._pieces.append(Piece(piece_color, (n, 3)))
-                self._pieces.append(Piece(piece_color, (n, 1)))
-            for n in row[1::2]:
-                self._pieces.append(Piece(piece_color, (n, 2)))
+            for i in row[::2]:
+                pieces_list.append(Piece(piece_color, (i, 3)))
+                pieces_list.append(Piece(piece_color, (i, 1)))
+            for i in row[1::2]:
+                pieces_list.append(Piece(piece_color, (i, 2)))
+
         if piece_color == "White":
-            for n in row[::2]:
-                self._pieces.append(Piece(piece_color, (n, 7)))
-            for n in row[1::2]:
-                self._pieces.append(Piece(piece_color, (n, 8)))
-                self._pieces.append(Piece(piece_color, (n, 6)))
+            for i in row[::2]:
+                pieces_list.append(Piece(piece_color, (i, 7)))
+            for i in row[1::2]:
+                pieces_list.append(Piece(piece_color, (i, 8)))
+                pieces_list.append(Piece(piece_color, (i, 6)))
+
+    def get_name(self):
+        return self._player_name
+
+    def get_color(self):
+        return self._piece_color
 
     def get_king_count(self):
         """
@@ -172,7 +194,7 @@ class Player:
         """
         king_count = 0
         for pieces in self._pieces:
-            if pieces.return_condition() == 1:
+            if pieces.king_counts() == 1:
                 king_count += 1
         return king_count
 
@@ -183,7 +205,7 @@ class Player:
         """
         trip_king_count = 0
         for pieces in self._pieces:
-            if pieces.return_condition() == 2:
+            if pieces.king_counts() == 2:
                 trip_king_count += 1
         return trip_king_count
 
@@ -192,9 +214,9 @@ class Player:
         This method will return the number of pieces the given player has captured
         """
         return self._captured_pieces
-        pass
 
 
 game = Checkers()
 p1 = game.create_player("Dan", "Black")
+p2 = game.create_player("Emily", "Black")
 print(p1.get_king_count())
