@@ -71,7 +71,7 @@ class Checkers:
         """
         self._players.append(player)
 
-    def return_board(self):
+    def print_board(self):
 
         for row in range(8):
             for col in range(8):
@@ -235,4 +235,4 @@ class Player:
 game = Checkers()
 p1 = game.create_player("Dan", "Black")
 p2 = game.create_player("Darcie", "White")
-print(game.return_board())
+print(game.print_board())
