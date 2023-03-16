@@ -31,13 +31,13 @@ class Piece:
         """
         return self._condition
 
-    def return_location(self):
+    def get_location(self):
         """
         This method shows the piece's location on the board
         """
         return self._location
 
-    def return_color(self, location: tuple):
+    def get_color(self):
         return self._color
 
     def return_condition(self, location: tuple):
@@ -54,16 +54,16 @@ class Checkers:
 
     def __init__(self):
         self._players = []
-        self._board = [
-                [(1, 8), (2, 8), (3, 8), (4, 8), (5, 8), (6, 8), (7, 8), (8, 8)],
-                [(1, 7), (2, 7), (3, 7), (4, 7), (5, 7), (6, 7), (7, 7), (8, 7)],
-                [(1, 6), (2, 6), (3, 6), (4, 6), (5, 6), (6, 6), (7, 6), (8, 6)],
-                [(1, 5), (2, 5), (3, 5), (4, 5), (5, 5), (6, 5), (7, 5), (8, 5)],
-                [(1, 4), (2, 4), (3, 4), (4, 4), (5, 4), (6, 4), (7, 4), (8, 4)],
-                [(1, 3), (2, 3), (3, 3), (4, 3), (5, 3), (6, 3), (7, 3), (8, 3)],
-                [(1, 2), (2, 2), (3, 2), (4, 2), (5, 2), (6, 2), (7, 2), (8, 2)],
-                [(1, 1), (2, 1), (3, 1), (4, 1), (5, 1), (6, 1), (7, 1), (8, 1)]
-            ]
+        #self.board = [
+                #(1, 8), (2, 8), (3, 8), (4, 8), (5, 8), (6, 8), (7, 8), (8, 8),
+                #(1, 7), (2, 7), (3, 7), (4, 7), (5, 7), (6, 7), (7, 7), (8, 7),
+                #(1, 6), (2, 6), (3, 6), (4, 6), (5, 6), (6, 6), (7, 6), (8, 6),
+                #(1, 5), (2, 5), (3, 5), (4, 5), (5, 5), (6, 5), (7, 5), (8, 5),
+                #(1, 4), (2, 4), (3, 4), (4, 4), (5, 4), (6, 4), (7, 4), (8, 4),
+                #(1, 3), (2, 3), (3, 3), (4, 3), (5, 3), (6, 3), (7, 3), (8, 3),
+                #(1, 2), (2, 2), (3, 2), (4, 2), (5, 2), (6, 2), (7, 2), (8, 2),
+                #(1, 1), (2, 1), (3, 1), (4, 1), (5, 1), (6, 1), (7, 1), (8, 1)
+            #]
 
     def append_player_list(self, player: object):
         """
@@ -72,7 +72,21 @@ class Checkers:
         self._players.append(player)
 
     def return_board(self):
-        return self._board
+
+        for row in range(8):
+            for col in range(8):
+                piece_found = False
+                for player in self._players:
+                    for piece in player.get_pieces_list():
+                        if piece.get_location() == (col + 1, 8 - row):
+                            print("|", piece.get_color(), end=" |")
+                            piece_found = True
+                            break
+                    if piece_found:
+                        break
+                if not piece_found:
+                    print("| None", end=" |")
+            print()
 
     def create_player(self, player_name: str, piece_color: str):
         """
@@ -151,7 +165,6 @@ class Checkers:
         pass
 
 
-
 class Player:
     """
     This class will create Player objects, of which there are two per game. It will be initialized by the create_player
@@ -181,6 +194,9 @@ class Player:
             for i in row[1::2]:
                 pieces_list.append(Piece(piece_color, (i, 8)))
                 pieces_list.append(Piece(piece_color, (i, 6)))
+
+    def get_pieces_list(self):
+        return self._pieces
 
     def get_name(self):
         return self._player_name
@@ -218,5 +234,5 @@ class Player:
 
 game = Checkers()
 p1 = game.create_player("Dan", "Black")
-p2 = game.create_player("Emily", "Black")
-print(p1.get_king_count())
+p2 = game.create_player("Darcie", "White")
+print(game.return_board())
