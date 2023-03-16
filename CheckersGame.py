@@ -74,18 +74,18 @@ class Checkers:
     def print_board(self):
 
         for row in range(8):
-            for col in range(8):
+            for column in range(8):
                 piece_found = False
                 for player in self._players:
                     for piece in player.get_pieces_list():
-                        if piece.get_location() == (col + 1, 8 - row):
+                        if piece.get_location() == (column + 1, 8 - row):
                             print("|", piece.get_color(), end=" |")
                             piece_found = True
-                            break
+                            continue
                     if piece_found:
-                        break
+                        continue
                 if not piece_found:
-                    print("| None", end=" |")
+                    print("|", None, end=" |")
             print()
 
     def create_player(self, player_name: str, piece_color: str):
@@ -149,13 +149,6 @@ class Checkers:
         pass
 
         # needs to return if king or triple king
-
-    def print_board(self):
-        """
-        This method will print the entire board as an array to give players a visualization of the current game
-        """
-        # print the board as an array
-        pass
 
     def game_winner(self):
         """
@@ -235,4 +228,4 @@ class Player:
 game = Checkers()
 p1 = game.create_player("Dan", "Black")
 p2 = game.create_player("Darcie", "White")
-print(game.print_board())
+game.print_board()
