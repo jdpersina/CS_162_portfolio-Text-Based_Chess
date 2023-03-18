@@ -152,9 +152,6 @@ class Checkers:
             if player_color_comparison == "Black":
                 raise OutOfTurn("It's not your turn!")
 
-        # add turn for next player
-        self.game_turn += 1
-
         # Checking the player's pieces to make sure there is one at starting location
         player_pieces = current_player.get_pieces_list()
         for pieces in player_pieces:
@@ -164,31 +161,32 @@ class Checkers:
         else:
             raise InvalidSquare("You don't have a piece on this square")
 
-        # Check whether piece is normal, king, or triple king, decide whether destination location is a legal move
         # Move logic
         # Unplayable squares
-        for x, y in destination_location:
-            if y % 2 == 0 and x % 2 != 0:
-                InvalidSquare("This is not a playable square")
-            elif y % 2 != 0 and x % 2 == 0:
-                InvalidSquare("This is not a playable square")
-            elif x > 8 or y > 8:
-                InvalidSquare("This square is outside of the 8x8 coordinates")
-            elif x < 1 or y < 1:
-                InvalidSquare("There are no square coordinates less than 1")
+        x, y = destination_location
+        if y % 2 == 0 and x % 2 != 0:
+            raise InvalidSquare("This is not a playable square")
+        if y % 2 != 0 and x % 2 == 0:
+            raise InvalidSquare("This is not a playable square")
+        if x > 8 or y > 8:
+            raise InvalidSquare("This square is outside of the 8x8 coordinates")
+        if x < 1 or y < 1:
+            raise InvalidSquare("There are no square coordinates less than 1")
+
         # Rules applying to all pieces
         if starting_location == destination_location:
-            InvalidSquare("This is not a legal move")
+            raise InvalidSquare("This is not a legal move")
+        for players in self._players:
+            for pieces in players.get_pieces_list():
+                if pieces.get_location() == destination_location:
+                    raise InvalidSquare("There is already a piece at this location")
+
+
         # logic for black piece moves
         while current_piece.get_color() == "Black":
             # Condition 0 is a normal piece
             if current_piece.get_condition() == 0:
-                for i, j in starting_location:
-                    for x, y in destination_location:
-                        if y - j <= 0:
-                            raise InvalidSquare("Your piece can't move this way, it must move forward")
-                        elif x == i and y - j < 4:
-                            raise InvalidSquare("You must move diagonally")
+                pass
 
 
     def print_captured_pieces(self):
@@ -232,14 +230,14 @@ class Player:
         # This block of code populates the checkers board with the correct starting positions per piece color
         pieces_list = self._pieces
         row = [1, 2, 3, 4, 5, 6, 7, 8]
-        while piece_color == "Black":
+        if piece_color == "Black":
             for i in row[::2]:
                 pieces_list.append(Piece(piece_color, (i, 3)))
                 pieces_list.append(Piece(piece_color, (i, 1)))
             for i in row[1::2]:
                 pieces_list.append(Piece(piece_color, (i, 2)))
 
-        while piece_color == "White":
+        if piece_color == "White":
             for i in row[::2]:
                 pieces_list.append(Piece(piece_color, (i, 7)))
             for i in row[1::2]:
