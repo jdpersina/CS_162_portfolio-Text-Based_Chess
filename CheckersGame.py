@@ -54,6 +54,7 @@ class Checkers:
 
     def __init__(self):
         self._players = []
+        self.game_turn = 1
         #self.board = [
                 #(1, 8), (2, 8), (3, 8), (4, 8), (5, 8), (6, 8), (7, 8), (8, 8),
                 #(1, 7), (2, 7), (3, 7), (4, 7), (5, 7), (6, 7), (7, 7), (8, 7),
@@ -71,20 +72,24 @@ class Checkers:
         """
         self._players.append(player)
 
+    def get_player_list(self):
+        return self._players
+
     def print_board(self):
 
+        players_list = self._players
         for row in range(8):
             for column in range(8):
-                piece_found = False
-                for player in self._players:
-                    for piece in player.get_pieces_list():
-                        if piece.get_location() == (column + 1, 8 - row):
-                            print("|", piece.get_color(), end=" |")
-                            piece_found = True
+                piece_pop = False
+                for player in players_list:
+                    for pieces in player.get_pieces_list():
+                        if pieces.get_location() == (column + 1, 8 - row):
+                            print("|", pieces.get_color(), end=" |")
+                            piece_pop = True
                             continue
-                    if piece_found:
+                    if piece_pop:
                         continue
-                if not piece_found:
+                if not piece_pop:
                     print("|", None, end=" |")
             print()
 
@@ -127,8 +132,26 @@ class Checkers:
         :return:
         """
 
-        if self._players.turn == False:
-            raise OutOfTurn("It's not your turn!")
+        # Check to make sure given player name exists
+        players_list = self._players
+        for players in players_list:
+            if player_name == players.get_name():
+                continue
+            else:
+                raise InvalidPlayer("There is no player by this name")
+
+        # check to make sure it is the given player's turn
+        for players in players_list:
+            player_color_comparison = Player.name_reference(player_name)
+        while self.game_turn % 2 != 0:
+            if player_color_comparison == "White":
+                raise OutOfTurn("It's not your turn!")
+        while self.game_turn % 2 == 0:
+            if player_color_comparison == "Black":
+                raise OutOfTurn("It's not your turn!")
+
+
+
 
         if piece in starting_square_location is not player.piece: # does not belong to player
             raise InvalidSquare("The piece in this square isn't yours")
@@ -162,7 +185,8 @@ class Player:
     """
     This class will create Player objects, of which there are two per game. It will be initialized by the create_player
     method in the Checkers class. This object will store player information including name, piece color, the number of
-    Kings and Triple Kings, and pieces captured
+    Kings and Triple Kings, and pieces captured. The pieces for each player are initialized automatically when each
+    player is created
     """
 
     def __init__(self, player_name, piece_color):
@@ -187,6 +211,15 @@ class Player:
             for i in row[1::2]:
                 pieces_list.append(Piece(piece_color, (i, 8)))
                 pieces_list.append(Piece(piece_color, (i, 6)))
+
+    def name_reference(self, name):
+        """
+        This method will retrieve the piece color of a player by their name. The purpose is to make sure it is the
+        player's turn in the Checkers play game method
+        """
+        for player in Checkers.get_player_list():
+            if name == player.get_name():
+                return player.get_color()
 
     def get_pieces_list(self):
         return self._pieces
