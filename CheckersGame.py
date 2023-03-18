@@ -165,20 +165,31 @@ class Checkers:
             raise InvalidSquare("You don't have a piece on this square")
 
         # Check whether piece is normal, king, or triple king, decide whether destination location is a legal move
+        # Move logic
+        # Unplayable squares
+        for x, y in destination_location:
+            if y % 2 == 0 and x % 2 != 0:
+                InvalidSquare("This is not a playable square")
+            elif y % 2 != 0 and x % 2 == 0:
+                InvalidSquare("This is not a playable square")
+            elif x > 8 or y > 8:
+                InvalidSquare("This square is outside of the 8x8 coordinates")
+            elif x < 1 or y < 1:
+                InvalidSquare("There are no square coordinates less than 1")
+        # Rules applying to all pieces
+        if starting_location == destination_location:
+            InvalidSquare("This is not a legal move")
         # logic for black piece moves
-        if current_piece.get_color() == "Black":
+        while current_piece.get_color() == "Black":
             # Condition 0 is a normal piece
-            while current_piece.get_condition() == 0:
+            if current_piece.get_condition() == 0:
                 for i, j in starting_location:
                     for x, y in destination_location:
-                        if
+                        if y - j <= 0:
+                            raise InvalidSquare("Your piece can't move this way, it must move forward")
+                        elif x == i and y - j < 4:
+                            raise InvalidSquare("You must move diagonally")
 
-
-
-
-        for coordinates in self.board:
-            if starting_location and destination_location in self.board:
-                continue
 
     def print_captured_pieces(self):
         """
