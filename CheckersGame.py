@@ -40,7 +40,7 @@ class Piece:
     def get_color(self):
         return self._color
 
-    def return_condition(self, location: tuple):
+    def get_condition(self):
         return self._condition
 
 
@@ -55,16 +55,16 @@ class Checkers:
     def __init__(self):
         self._players = []
         self.game_turn = 1
-        #self.board = [
-                #(1, 8), (2, 8), (3, 8), (4, 8), (5, 8), (6, 8), (7, 8), (8, 8),
-                #(1, 7), (2, 7), (3, 7), (4, 7), (5, 7), (6, 7), (7, 7), (8, 7),
-                #(1, 6), (2, 6), (3, 6), (4, 6), (5, 6), (6, 6), (7, 6), (8, 6),
-                #(1, 5), (2, 5), (3, 5), (4, 5), (5, 5), (6, 5), (7, 5), (8, 5),
-                #(1, 4), (2, 4), (3, 4), (4, 4), (5, 4), (6, 4), (7, 4), (8, 4),
-                #(1, 3), (2, 3), (3, 3), (4, 3), (5, 3), (6, 3), (7, 3), (8, 3),
-                #(1, 2), (2, 2), (3, 2), (4, 2), (5, 2), (6, 2), (7, 2), (8, 2),
-                #(1, 1), (2, 1), (3, 1), (4, 1), (5, 1), (6, 1), (7, 1), (8, 1)
-            #]
+        self.board = [
+                (1, 8), (2, 8), (3, 8), (4, 8), (5, 8), (6, 8), (7, 8), (8, 8),
+                (1, 7), (2, 7), (3, 7), (4, 7), (5, 7), (6, 7), (7, 7), (8, 7),
+                (1, 6), (2, 6), (3, 6), (4, 6), (5, 6), (6, 6), (7, 6), (8, 6),
+                (1, 5), (2, 5), (3, 5), (4, 5), (5, 5), (6, 5), (7, 5), (8, 5),
+                (1, 4), (2, 4), (3, 4), (4, 4), (5, 4), (6, 4), (7, 4), (8, 4),
+                (1, 3), (2, 3), (3, 3), (4, 3), (5, 3), (6, 3), (7, 3), (8, 3),
+                (1, 2), (2, 2), (3, 2), (4, 2), (5, 2), (6, 2), (7, 2), (8, 2),
+                (1, 1), (2, 1), (3, 1), (4, 1), (5, 1), (6, 1), (7, 1), (8, 1)
+            ]
 
     def append_player_list(self, player: object):
         """
@@ -123,39 +123,62 @@ class Checkers:
         self._players.append(Player(player_name, piece_color))
         return Player(player_name, piece_color)
 
-    def play_game(self, player_name: str, starting_square_location: tuple, destination_square_location: tuple):
+    def play_game(self, player_name: str, starting_location: tuple, destination_location: tuple):
         """
         This method will allow the players to play the game
         :param player_name: The unique player name to identify the player making the move
-        :param starting_square_location: The location of the piece the player wishes to move
-        :param destination_square_location: The location the player wants to move their piece to
+        :param starting_location: The location of the piece the player wishes to move
+        :param destination_location: The location the player wants to move their piece to
         :return:
         """
 
         # Check to make sure given player name exists
         players_list = self._players
-        for players in players_list:
-            if player_name == players.get_name():
-                continue
-            else:
-                raise InvalidPlayer("There is no player by this name")
+        for player in players_list:
+            if player.get_name() == player_name:
+                current_player = player
+                break
+        else:
+            raise InvalidPlayer("There is no player by this name")
 
         # check to make sure it is the given player's turn
-        for players in players_list:
-            player_color_comparison = Player.name_reference(player_name)
+        player_color_comparison = current_player.get_color()
         while self.game_turn % 2 != 0:
             if player_color_comparison == "White":
                 raise OutOfTurn("It's not your turn!")
+            else:
+                break
         while self.game_turn % 2 == 0:
             if player_color_comparison == "Black":
                 raise OutOfTurn("It's not your turn!")
 
+        # add turn for next player
+        self.game_turn += 1
+
+        # Checking the player's pieces to make sure there is one at starting location
+        player_pieces = current_player.get_pieces_list()
+        for pieces in player_pieces:
+            if pieces.get_location() == starting_location:
+                current_piece = pieces
+                break
+        else:
+            raise InvalidSquare("You don't have a piece on this square")
+
+        # Check whether piece is normal, king, or triple king, decide whether destination location is a legal move
+        # logic for black piece moves
+        if current_piece.get_color() == "Black":
+            # Condition 0 is a normal piece
+            while current_piece.get_condition() == 0:
+                for i, j in starting_location:
+                    for x, y in destination_location:
+                        if
 
 
 
-        if piece in starting_square_location is not player.piece: # does not belong to player
-            raise InvalidSquare("The piece in this square isn't yours")
-        pass
+
+        for coordinates in self.board:
+            if starting_location and destination_location in self.board:
+                continue
 
     def print_captured_pieces(self):
         """
@@ -198,28 +221,19 @@ class Player:
         # This block of code populates the checkers board with the correct starting positions per piece color
         pieces_list = self._pieces
         row = [1, 2, 3, 4, 5, 6, 7, 8]
-        if piece_color == "Black":
+        while piece_color == "Black":
             for i in row[::2]:
                 pieces_list.append(Piece(piece_color, (i, 3)))
                 pieces_list.append(Piece(piece_color, (i, 1)))
             for i in row[1::2]:
                 pieces_list.append(Piece(piece_color, (i, 2)))
 
-        if piece_color == "White":
+        while piece_color == "White":
             for i in row[::2]:
                 pieces_list.append(Piece(piece_color, (i, 7)))
             for i in row[1::2]:
                 pieces_list.append(Piece(piece_color, (i, 8)))
                 pieces_list.append(Piece(piece_color, (i, 6)))
-
-    def name_reference(self, name):
-        """
-        This method will retrieve the piece color of a player by their name. The purpose is to make sure it is the
-        player's turn in the Checkers play game method
-        """
-        for player in Checkers.get_player_list():
-            if name == player.get_name():
-                return player.get_color()
 
     def get_pieces_list(self):
         return self._pieces
@@ -262,3 +276,4 @@ game = Checkers()
 p1 = game.create_player("Dan", "Black")
 p2 = game.create_player("Darcie", "White")
 game.print_board()
+game.play_game("Dan", (1, 1), (2, 2))
