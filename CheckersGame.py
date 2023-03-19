@@ -25,11 +25,15 @@ class Piece:
         self._location = location
         self._condition = 0
 
-    def king_counts(self):
-        """
-        This method shows whether the piece is normal, king, or a triple king
-        """
+    def get_condition(self):
         return self._condition
+
+    def condition_change(self):
+        """
+        This method will change the condition for the given piece, (0 = normal, 1 = King, 2 = Triple King) when the
+        conditions for change are met
+        """
+        self._condition += 1
 
     def get_location(self):
         """
@@ -37,11 +41,15 @@ class Piece:
         """
         return self._location
 
+    def change_location(self, new_coords):
+        """
+        This is a method to change the piece's coordinates
+        :param new_coords: a tuple that gives the piece its new location after a legal move
+        """
+        self._location = new_coords
+
     def get_color(self):
         return self._color
-
-    def get_condition(self):
-        return self._condition
 
 
 class Checkers:
@@ -78,12 +86,12 @@ class Checkers:
     def print_board(self):
 
         players_list = self._players
-        for row in range(8):
+        for row in reversed(range(8)):
             for column in range(8):
                 piece_pop = False
                 for player in players_list:
                     for pieces in player.get_pieces_list():
-                        if pieces.get_location() == (column + 1, 8 - row):
+                        if pieces.get_location() == (column, row):
                             print("|", pieces.get_color(), end=" |")
                             piece_pop = True
                             continue
@@ -164,14 +172,14 @@ class Checkers:
         # Move logic
         # Unplayable squares
         x, y = destination_location
-        if y % 2 == 0 and x % 2 != 0:
-            raise InvalidSquare("This is not a playable square")
         if y % 2 != 0 and x % 2 == 0:
             raise InvalidSquare("This is not a playable square")
-        if x > 8 or y > 8:
-            raise InvalidSquare("This square is outside of the 8x8 coordinates")
-        if x < 1 or y < 1:
-            raise InvalidSquare("There are no square coordinates less than 1")
+        if y % 2 == 0 and x % 2 != 0:
+            raise InvalidSquare("This is not a playable square")
+        if x > 7 or y > 7:
+            raise InvalidSquare("There are no square coordinates greater than 7")
+        if x < 0 or y < 0:
+            raise InvalidSquare("There are no square coordinates less than 0")
 
         # Rules applying to all pieces
         if starting_location == destination_location:
@@ -181,12 +189,82 @@ class Checkers:
                 if pieces.get_location() == destination_location:
                     raise InvalidSquare("There is already a piece at this location")
 
-
         # logic for black piece moves
-        while current_piece.get_color() == "Black":
+        if current_piece.get_color() == "Black":
             # Condition 0 is a normal piece
             if current_piece.get_condition() == 0:
-                pass
+                i, j = starting_location
+                x, y = destination_location
+                # Check diagonal space around piece to see if there are other player's pieces around
+                quad_1 = (i - 1, j + 1)
+                quad_2 = (i + 1, j + 1)
+                quad_3 = (i - 1, j - 1)
+                quad_4 = (i + 1, j - 1)
+                q_1_opposed_piece = False
+                q_2_opposed_piece = False
+                q_1_team_piece = False
+                q_2_team_piece = False
+                q_1_op_mess = f"There is a piece at {quad_1} that you must jump"
+                q_2_op_mess = f"There is a piece at {quad_2} that you must jump"
+                team_mess = "You can't jump your own pieces"
+                for player in self._players:
+                    if player.get_color() == "White":
+                        opposed_player = player
+                        for pieces in opposed_player.get_pieces_list():
+                            if pieces.get_location() == quad_1:
+                                q_1_op = pieces
+                                q_1_opposed_piece = True
+                            if pieces.get_location() == quad_2:
+                                q_2_op = pieces
+                                q_2_opposed_piece = True
+                    if player.get_color() == "Black":
+                        same_player = player
+                        for pieces in same_player.get_pieces_list():
+                            if pieces.get_location() == quad_1:
+                                q_1_team = pieces
+                                q_1_team_piece = True
+                            if pieces.get_location() == quad_2:
+                                q_2_team = pieces
+                                q_2_team_piece = True
+                    if q_1_team_piece and q_2_team_piece:
+                        return "The piece you want to move doesn't have any legal moves"
+                    elif q_1_team_piece and destination_location == (i - 2, j + 2):
+                        return team_mess
+                    elif q_2_team_piece and destination_location == (i + 2, j + 2):
+                        return team_mess
+                    elif q_1_opposed_piece and not q_2_opposed_piece:
+                        if destination_location == (i + 1, j + 1):
+                            return q_1_op_mess
+                    elif q_2_opposed_piece and not q_1_opposed_piece:
+                        if destination_location == (i - 1, j + 1):
+                            return q_2_op_mess
+
+
+
+
+
+        # Condition checks and changes. y is unpacked destination tuple y coordinate
+        king_message = f"The piece at {destination_location} is now a King!"
+        x3_king_message = f"The piece at {destination_location} is now a Triple King!"
+
+        if current_piece.get_color == "Black":
+            # Black piece change to king
+            if current_piece.get_condition() == 0 and y == 7:
+                current_piece.condition_change()
+                print(king_message)
+            # Black piece change to Triple King
+            if current_piece.get_condition == 1 and y == 0:
+                current_piece.condition_change()
+                print(x3_king_message)
+        if current_piece.get_color == "White":
+            # White piece change to King
+            if current_piece.get_condition() == 0 and y == 0:
+                current_piece.condition_change()
+                print(king_message)
+            # White piece change to Triple King
+            if current_piece.get_condition == 1 and y == 7:
+                current_piece.condition_change()
+                print(x3_king_message)
 
 
     def print_captured_pieces(self):
@@ -229,20 +307,20 @@ class Player:
 
         # This block of code populates the checkers board with the correct starting positions per piece color
         pieces_list = self._pieces
-        row = [1, 2, 3, 4, 5, 6, 7, 8]
+        row = [0, 1, 2, 3, 4, 5, 6, 7]
         if piece_color == "Black":
             for i in row[::2]:
-                pieces_list.append(Piece(piece_color, (i, 3)))
-                pieces_list.append(Piece(piece_color, (i, 1)))
-            for i in row[1::2]:
                 pieces_list.append(Piece(piece_color, (i, 2)))
+                pieces_list.append(Piece(piece_color, (i, 0)))
+            for i in row[1::2]:
+                pieces_list.append(Piece(piece_color, (i, 1)))
 
         if piece_color == "White":
             for i in row[::2]:
-                pieces_list.append(Piece(piece_color, (i, 7)))
-            for i in row[1::2]:
-                pieces_list.append(Piece(piece_color, (i, 8)))
                 pieces_list.append(Piece(piece_color, (i, 6)))
+            for i in row[1::2]:
+                pieces_list.append(Piece(piece_color, (i, 7)))
+                pieces_list.append(Piece(piece_color, (i, 5)))
 
     def get_pieces_list(self):
         return self._pieces
@@ -285,4 +363,5 @@ game = Checkers()
 p1 = game.create_player("Dan", "Black")
 p2 = game.create_player("Darcie", "White")
 game.print_board()
-game.play_game("Dan", (1, 1), (2, 2))
+
+
