@@ -1,3 +1,8 @@
+# Author: Joseph 'Dan' Persina
+# GitHub username: jdpersina
+# Date: 3/4/23
+# Description: A checkers game with modified rules
+
 class InvalidPlayer(Exception):
     """
     Exception to raise when a player name or checker color is incorrect
@@ -20,6 +25,12 @@ class InvalidSquare(Exception):
 
 
 class Piece:
+    """
+    The piece class has three attributes: Condition, which keeps track of whether the piece is normal, a King, or
+    Triple King. Color, either Black or White in keeping with traditional checkers pieces colors, and a location on the
+    board as a coordinate tuple. The pieces for each player are populated to the board automatically when the player for
+    the given color is created.
+    """
     def __init__(self, color: str, location: tuple):
         self._color = color
         self._location = location
@@ -150,6 +161,8 @@ class Checkers:
         :param destination_location: The location the player wants to move their piece to
         :return:
         """
+        # Keeping count of the pieces captured this turn
+        captured_pieces = 0
 
         # Check to make sure given player name exists
         players_list = self._players
@@ -192,7 +205,7 @@ class Checkers:
         if y % 2 == 0 and x % 2 != 0:
             raise InvalidSquare("This is not a playable square")
 
-        # Squares that exist outside  the 8x8 board
+        # Squares that exist outside the 8x8 board
         if x > 7 or y > 7:
             raise InvalidSquare("There are no square coordinates greater than 7")
         if x < 0 or y < 0:
@@ -292,11 +305,13 @@ class Checkers:
                         opposed_player.remove_piece(q_1_op)
                         current_piece.change_location(destination_location)
                         piece_taken = True
+                        captured_pieces += 1
 
                     elif destination_location == (i + 2, j + 2):
                         opposed_player.remove_piece(q_2_op)
                         current_piece.change_location(destination_location)
                         piece_taken = True
+                        captured_pieces += 1
 
                     # Black piece change to king
                     if current_piece.get_condition() == 0 and y == 7:
@@ -304,6 +319,19 @@ class Checkers:
                     # Black piece change to Triple King
                     if current_piece.get_condition == 1 and y == 0:
                         condition_change = True
+
+            if current_piece.get_condition() == 1:
+                # Condition 1 is a normal piece
+                if current_piece.get_condition() == 0:
+                    quad_1 = (i - 1, j + 1)
+                    quad_2 = (i + 1, j + 1)
+                    quad_3 = (i - 1, j - 1)
+                    quad_4 = (i + 1, j - 1)
+                    q_1_op_mess = f"There is a piece at {quad_1} that you must jump"
+                    q_2_op_mess = f"There is a piece at {quad_2} that you must jump"
+                    q_3_op_mess = f"There is a piece at {quad_3} that you must jump"
+                    q_4_op_mess = f"There is a piece at {quad_4} that you must jump"
+                    team_mess = "You can't jump your own pieces"
 
         # Logic for White pieces
         if current_piece.get_color() == "White":
@@ -368,6 +396,7 @@ class Checkers:
                         current_piece.change_location(destination_location)
                         current_player.piece_captured()
                         piece_taken = True
+                        captured_pieces += 1
 
                     # successful move, taking a piece
                     elif destination_location == (i + 2, j - 2):
@@ -375,6 +404,7 @@ class Checkers:
                         current_piece.change_location(destination_location)
                         current_player.piece_captured()
                         piece_taken = True
+                        captured_pieces += 1
 
                     # White piece change to king
                     if current_piece.get_condition() == 0 and y == 0:
@@ -526,7 +556,8 @@ class Checkers:
                             return print("White_King")
                         elif info_piece.get_condition == 2:
                             return print("White_Triple_King")
-
+                else:
+                    return None
     def game_winner(self):
         """
         This method will either return the winner of the game or if the game hasn't ended yet, it will indicate so
@@ -629,15 +660,3 @@ class Player:
         This method will return the number of pieces the given player has captured
         """
         return self._captured_pieces
-
-
-game = Checkers()
-p1 = game.create_player("Dan", "Black")
-p2 = game.create_player("Darcie", "White")
-game.play_game("Dan", (0,2), (1,3))
-game.play_game("Darcie", (1,5), (2,4))
-game.play_game("Dan", (2,2), (3,3))
-game.play_game("Darcie", (2,4), (0,2))
-game.print_board()
-
-
