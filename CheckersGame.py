@@ -320,18 +320,63 @@ class Checkers:
                     if current_piece.get_condition == 1 and y == 0:
                         condition_change = True
 
+            # Condition 1 is a King piece
             if current_piece.get_condition() == 1:
-                # Condition 1 is a normal piece
-                if current_piece.get_condition() == 0:
-                    quad_1 = (i - 1, j + 1)
-                    quad_2 = (i + 1, j + 1)
-                    quad_3 = (i - 1, j - 1)
-                    quad_4 = (i + 1, j - 1)
-                    q_1_op_mess = f"There is a piece at {quad_1} that you must jump"
-                    q_2_op_mess = f"There is a piece at {quad_2} that you must jump"
-                    q_3_op_mess = f"There is a piece at {quad_3} that you must jump"
-                    q_4_op_mess = f"There is a piece at {quad_4} that you must jump"
-                    team_mess = "You can't jump your own pieces"
+                quad_1 = (i - 1, j + 1)
+                quad_2 = (i + 1, j + 1)
+                quad_3 = (i - 1, j - 1)
+                quad_4 = (i + 1, j - 1)
+                q_1_op_mess = f"There is a piece at {quad_1} that you must jump"
+                q_2_op_mess = f"There is a piece at {quad_2} that you must jump"
+                q_3_op_mess = f"There is a piece at {quad_3} that you must jump"
+                q_4_op_mess = f"There is a piece at {quad_4} that you must jump"
+                team_mess = "You can't jump your own pieces"
+
+                for player in self._players:
+                    if player.get_color() == "White":
+                        opposed_player = player
+                        for pieces in opposed_player.get_pieces_list():
+                            if pieces.get_location() == quad_1:
+                                q_1_op = pieces
+                                q_1_opposed_piece = True
+                            if pieces.get_location() == quad_2:
+                                q_2_op = pieces
+                                q_2_opposed_piece = True
+                            if pieces.get_location == quad_3:
+                                q_3_op = pieces
+                                q_3_opposed_piece = True
+                            if pieces.get_location == quad_4:
+                                q_4_op = pieces
+                                q_4_opposed_piece = True
+
+                    if player.get_color() == "Black":
+                        same_player = player
+                        for pieces in same_player.get_pieces_list():
+                            if pieces.get_location() == quad_1:
+                                q_1_team = pieces
+                                q_1_team_piece = True
+                            if pieces.get_location() == quad_2:
+                                q_2_team = pieces
+                                q_2_team_piece = True
+                            if pieces.get_location() == quad_3:
+                                q_3_team = pieces
+                                q_3_team_piece = True
+                            if pieces.get_location() == quad_4:
+                                q_4_team = pieces
+                                q_4_team_piece = True
+
+                    # Trying to jump a team piece
+                    if q_1_team_piece and destination_location == (i - 2, j + 2):
+                        return team_mess
+                    # Trying to jump a team piece
+                    elif q_2_team_piece and destination_location == (i + 2, j + 2):
+                        return team_mess
+                    # Trying to jump team piece
+                    elif q_3_team_piece and destination_location == (i - 2, j - 2):
+                        return team_mess
+                    # Trying to jump team piece
+                    elif q_4_team_piece and destination_location == (i + 2, j - 2):
+                        return team_mess
 
         # Logic for White pieces
         if current_piece.get_color() == "White":
@@ -502,9 +547,9 @@ class Checkers:
                     return print(f"{piece_taken_mess}. It's still your turn")
 
                 # No more pieces to jump
-                else:
-                    self.game_turn += 1
-                    return print(f"{piece_taken_mess} and your piece is now at {destination_location}")
+            else:
+                self.game_turn += 1
+                return print(f"{piece_taken_mess} and your piece is now at {destination_location}")
 
         # Condition Change only
         if condition_change:
@@ -558,6 +603,7 @@ class Checkers:
                             return print("White_Triple_King")
                 else:
                     return None
+
     def game_winner(self):
         """
         This method will either return the winner of the game or if the game hasn't ended yet, it will indicate so
