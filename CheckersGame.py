@@ -26,6 +26,9 @@ class Piece:
         self._condition = 0
 
     def get_condition(self):
+        """
+        Condition coincides with whether the given piece is 0 = normal, 1 = King, or 2 = Triple King
+        """
         return self._condition
 
     def condition_change(self):
@@ -49,6 +52,9 @@ class Piece:
         self._location = new_coords
 
     def get_color(self):
+        """
+        This method will return the color of the given piece
+        """
         return self._color
 
 
@@ -63,16 +69,6 @@ class Checkers:
     def __init__(self):
         self._players = []
         self.game_turn = 1
-        self.board = [
-                (1, 8), (2, 8), (3, 8), (4, 8), (5, 8), (6, 8), (7, 8), (8, 8),
-                (1, 7), (2, 7), (3, 7), (4, 7), (5, 7), (6, 7), (7, 7), (8, 7),
-                (1, 6), (2, 6), (3, 6), (4, 6), (5, 6), (6, 6), (7, 6), (8, 6),
-                (1, 5), (2, 5), (3, 5), (4, 5), (5, 5), (6, 5), (7, 5), (8, 5),
-                (1, 4), (2, 4), (3, 4), (4, 4), (5, 4), (6, 4), (7, 4), (8, 4),
-                (1, 3), (2, 3), (3, 3), (4, 3), (5, 3), (6, 3), (7, 3), (8, 3),
-                (1, 2), (2, 2), (3, 2), (4, 2), (5, 2), (6, 2), (7, 2), (8, 2),
-                (1, 1), (2, 1), (3, 1), (4, 1), (5, 1), (6, 1), (7, 1), (8, 1)
-            ]
 
     def append_player_list(self, player: object):
         """
@@ -83,18 +79,32 @@ class Checkers:
     def get_player_list(self):
         return self._players
 
+    def check_coordinates(self, coordinates: tuple):
+        for players in self._players:
+            for pieces in players.get_pieces_list():
+                if pieces.get_location() == coordinates:
+                    if pieces.get_color() == "Black":
+                        return "Black"
+                    if pieces.get_color == "White":
+                        return "White"
+
+                elif pieces.get_location() != coordinates:
+                    return None
+
     def print_board(self):
 
         players_list = self._players
         for row in reversed(range(8)):
             for column in range(8):
                 piece_pop = False
+
                 for player in players_list:
                     for pieces in player.get_pieces_list():
                         if pieces.get_location() == (column, row):
                             print("|", pieces.get_color(), end=" |")
                             piece_pop = True
                             continue
+
                     if piece_pop:
                         continue
                 if not piece_pop:
@@ -111,6 +121,7 @@ class Checkers:
         # Check to make sure player chose a discernible name
         if player_name == "":
             raise InvalidPlayer("You must choose a name")
+
         # Check to make sure player chose one of the two allowed piece colors, black or white
         if piece_color != 'White':
             if piece_color != 'Black':
@@ -156,9 +167,12 @@ class Checkers:
                 raise OutOfTurn("It's not your turn!")
             else:
                 break
+
         while self.game_turn % 2 == 0:
             if player_color_comparison == "Black":
                 raise OutOfTurn("It's not your turn!")
+            else:
+                break
 
         # Checking the player's pieces to make sure there is one at starting location
         player_pieces = current_player.get_pieces_list()
@@ -172,10 +186,13 @@ class Checkers:
         # Move logic
         # Unplayable squares
         x, y = destination_location
+        # SQUARES WHICH PIECES CAN'T LAND ON
         if y % 2 != 0 and x % 2 == 0:
             raise InvalidSquare("This is not a playable square")
         if y % 2 == 0 and x % 2 != 0:
             raise InvalidSquare("This is not a playable square")
+
+        # Squares that exist outside  the 8x8 board
         if x > 7 or y > 7:
             raise InvalidSquare("There are no square coordinates greater than 7")
         if x < 0 or y < 0:
@@ -188,25 +205,44 @@ class Checkers:
             for pieces in players.get_pieces_list():
                 if pieces.get_location() == destination_location:
                     raise InvalidSquare("There is already a piece at this location")
+                else:
+                    continue
+
+        # If player's move takes a piece, this will change to true, will print piece taken message at end of function
+        piece_taken = False
+        piece_taken_mess = "You took one of your opponent's pieces"
+
+        # If player's piece changes to king or triple king, this will turn true and print the condition change message
+        condition_change = False
+        king_message = f"The piece at {destination_location} is now a King!"
+        x3_king_message = f"The piece at {destination_location} is now a Triple King!"
+
+        # Unpacking the tuples for start and destination
+        i, j = starting_location
+        x, y = destination_location
+
+        # Check diagonal space around piece to see if there are other player's pieces around. Booleans, start False
+        q_1_opposed_piece = False
+        q_2_opposed_piece = False
+        q_3_opposed_piece = False
+        q_4_opposed_piece = False
+
+        # Check diagonal space around piece to see if the same player's pieces are around. Booleans, start False
+        q_1_team_piece = False
+        q_2_team_piece = False
+        q_3_team_piece = False
+        q_4_team_piece = False
 
         # logic for black piece moves
         if current_piece.get_color() == "Black":
             # Condition 0 is a normal piece
             if current_piece.get_condition() == 0:
-                i, j = starting_location
-                x, y = destination_location
-                # Check diagonal space around piece to see if there are other player's pieces around
                 quad_1 = (i - 1, j + 1)
                 quad_2 = (i + 1, j + 1)
-                quad_3 = (i - 1, j - 1)
-                quad_4 = (i + 1, j - 1)
-                q_1_opposed_piece = False
-                q_2_opposed_piece = False
-                q_1_team_piece = False
-                q_2_team_piece = False
                 q_1_op_mess = f"There is a piece at {quad_1} that you must jump"
                 q_2_op_mess = f"There is a piece at {quad_2} that you must jump"
                 team_mess = "You can't jump your own pieces"
+
                 for player in self._players:
                     if player.get_color() == "White":
                         opposed_player = player
@@ -217,6 +253,7 @@ class Checkers:
                             if pieces.get_location() == quad_2:
                                 q_2_op = pieces
                                 q_2_opposed_piece = True
+
                     if player.get_color() == "Black":
                         same_player = player
                         for pieces in same_player.get_pieces_list():
@@ -226,69 +263,280 @@ class Checkers:
                             if pieces.get_location() == quad_2:
                                 q_2_team = pieces
                                 q_2_team_piece = True
+
+                    # Team pieces on both possible moves
                     if q_1_team_piece and q_2_team_piece:
                         return "The piece you want to move doesn't have any legal moves"
+                    # Trying to jump a team piece
                     elif q_1_team_piece and destination_location == (i - 2, j + 2):
                         return team_mess
+                    # Trying to jump a team piece
                     elif q_2_team_piece and destination_location == (i + 2, j + 2):
                         return team_mess
+
+                    # If trying to move in right direction when player can take an opposing piece
                     elif q_1_opposed_piece and not q_2_opposed_piece:
-                        if destination_location == (i + 1, j + 1):
+                        if destination_location == (i + 1, j + 1) and self.check_coordinates((i - 2, j + 2)) is None:
                             return q_1_op_mess
+                    # If trying to move in left direction when player can take an opposing piece
                     elif q_2_opposed_piece and not q_1_opposed_piece:
-                        if destination_location == (i - 1, j + 1):
+                        if destination_location == (i - 1, j + 1) and self.check_coordinates((i + 2, j + 2)) is None:
                             return q_2_op_mess
 
+                    # successful move, taking no pieces
+                    elif destination_location == (i - 1, j + 1) or destination_location == (i + 1, j + 1):
+                        current_piece.change_location(destination_location)
 
+                    # successful move, capturing a piece
+                    elif destination_location == (i - 2, j + 2):
+                        opposed_player.remove_piece(q_1_op)
+                        current_piece.change_location(destination_location)
+                        piece_taken = True
 
+                    elif destination_location == (i + 2, j + 2):
+                        opposed_player.remove_piece(q_2_op)
+                        current_piece.change_location(destination_location)
+                        piece_taken = True
 
+                    # Black piece change to king
+                    if current_piece.get_condition() == 0 and y == 7:
+                        condition_change = True
+                    # Black piece change to Triple King
+                    if current_piece.get_condition == 1 and y == 0:
+                        condition_change = True
 
-        # Condition checks and changes. y is unpacked destination tuple y coordinate
-        king_message = f"The piece at {destination_location} is now a King!"
-        x3_king_message = f"The piece at {destination_location} is now a Triple King!"
+        # Logic for White pieces
+        if current_piece.get_color() == "White":
+            # Condition 0 is a normal piece
+            if current_piece.get_condition() == 0:
+                # For condition 0 pieces, we only check the quadrants ahead of them
+                quad_1 = (i - 1, j - 1)
+                quad_2 = (i + 1, j - 1)
 
-        if current_piece.get_color == "Black":
-            # Black piece change to king
-            if current_piece.get_condition() == 0 and y == 7:
-                current_piece.condition_change()
-                print(king_message)
-            # Black piece change to Triple King
-            if current_piece.get_condition == 1 and y == 0:
-                current_piece.condition_change()
-                print(x3_king_message)
-        if current_piece.get_color == "White":
-            # White piece change to King
+                # info messages when quadrants ahead of piece are populated
+                q_1_op_mess = f"There is a piece at {quad_1} that you must jump"
+                q_2_op_mess = f"There is a piece at {quad_2} that you must jump"
+                team_mess = "You can't jump your own pieces"
+
+                for player in self._players:
+                    if player.get_color() == "Black":
+                        opposed_player = player
+                        for pieces in opposed_player.get_pieces_list():
+                            if pieces.get_location() == quad_1:
+                                q_1_op = pieces
+                                q_1_opposed_piece = True
+                            if pieces.get_location() == quad_2:
+                                q_2_op = pieces
+                                q_2_opposed_piece = True
+
+                    if player.get_color() == "White":
+                        same_player = player
+                        for pieces in same_player.get_pieces_list():
+                            if pieces.get_location() == quad_1:
+                                q_1_team = pieces
+                                q_1_team_piece = True
+                            if pieces.get_location() == quad_2:
+                                q_2_team = pieces
+                                q_2_team_piece = True
+
+                    # Team pieces on both possible moves
+                    if q_1_team_piece and q_2_team_piece:
+                        return "The piece you want to move doesn't have any legal moves"
+                    # Trying to jump a team piece
+                    elif q_1_team_piece and destination_location == (i - 2, j - 2):
+                        return team_mess
+                    # Trying to jump a team piece
+                    elif q_2_team_piece and destination_location == (i + 2, j - 2):
+                        return team_mess
+
+                    # If trying to move in right direction when player can take an opposing piece
+                    elif q_1_opposed_piece and not q_2_opposed_piece:
+                        if destination_location == (i + 1, j - 1) and self.check_coordinates((i - 2, j - 2)) is None:
+                            return q_1_op_mess
+                    # If trying to move in left direction when player can take an opposing piece
+                    elif q_2_opposed_piece and not q_1_opposed_piece:
+                        if destination_location == (i - 1, j - 1) and self.check_coordinates((i + 2, j - 2)) is None:
+                            return q_2_op_mess
+
+                    # successful move, taking no pieces
+                    elif destination_location == (i - 1, j - 1) or destination_location == (i + 1, j - 1):
+                        current_piece.change_location(destination_location)
+
+                    # successful move, taking a piece
+                    elif destination_location == (i - 2, j - 2):
+                        opposed_player.remove_piece(q_1_op)
+                        current_piece.change_location(destination_location)
+                        current_player.piece_captured()
+                        piece_taken = True
+
+                    # successful move, taking a piece
+                    elif destination_location == (i + 2, j - 2):
+                        opposed_player.remove_piece(q_2_op)
+                        current_piece.change_location(destination_location)
+                        current_player.piece_captured()
+                        piece_taken = True
+
+                    # White piece change to king
+                    if current_piece.get_condition() == 0 and y == 0:
+                        condition_change = True
+
+                    # White piece change to Triple King
+                    if current_piece.get_condition == 1 and y == 7:
+                        condition_change = True
+
+            # White piece change to King conditions
             if current_piece.get_condition() == 0 and y == 0:
-                current_piece.condition_change()
-                print(king_message)
-            # White piece change to Triple King
+                condition_change = True
+
+            # White piece change to Triple King conditions
             if current_piece.get_condition == 1 and y == 7:
+                condition_change = True
+
+        if piece_taken and condition_change:
+            if current_piece.get_condition() == 0:
+                # Change to King
                 current_piece.condition_change()
-                print(x3_king_message)
 
+                # Check if there are more pieces to take
+                # Only checking forward facing coordinates for each color since they're at the end of the board to ~
+                #      ~ get condition change
+                if current_player.get_color() == "Black":
+                    if self.check_coordinates((x - 1, y - 1)) == opposed_player.get_color:
+                        if self.check_coordinates((x - 2, y - 2)) is None:
+                            return print(f"{piece_taken_mess} and {king_message}. It's still your turn")
 
-    def print_captured_pieces(self):
-        """
-        This method will return the amount of pieces the given player has captured
-        """
-        return Player.get_captured_pieces_count()
+                    elif self.check_coordinates((x + 1, y - 1)) == opposed_player.get_color:
+                        if self.check_coordinates((x + 2, y - 2)) is None:
+                            return print(f"{piece_taken_mess} and {king_message}. It's still your turn")
+
+                if current_player.get_color() == "White":
+                    if self.check_coordinates((x - 1, y + 1)) == opposed_player.get_color:
+                        if self.check_coordinates((x - 2, y + 2)) is None:
+                            return print(f"{piece_taken_mess} and {king_message}. It's still your turn")
+
+                    if self.check_coordinates((x + 1, y + 1)) == opposed_player.get_color:
+                        if self.check_coordinates((x + 2, y + 2)) is None:
+                            return print(f"{piece_taken_mess} and {king_message}. It's still your turn")
+
+                    # No more pieces to jump
+                    else:
+                        self.game_turn += 1
+                        return print(f"{piece_taken_mess} and {king_message}")
+
+            elif current_piece.get_condition == 1:
+                # Change to Triple King
+                current_piece.condition_change()
+
+                # check if there are more pieces to take
+                # Only checking forward facing coordinates for each color since they're at the end of the board to ~
+                #      ~ get condition change
+                if current_player.get_color() == "Black":
+                    if self.check_coordinates((x - 1, y + 1)) == opposed_player.get_color:
+                        if self.check_coordinates((x - 2, y + 2)) is None:
+                            return print(f"{piece_taken_mess} and {x3_king_message}. It's still your turn")
+
+                    elif self.check_coordinates((x + 1, y + 1)) == opposed_player.get_color:
+                        if self.check_coordinates((x + 2, y + 2)) is None:
+                            return print(f"{piece_taken_mess} and {x3_king_message}. It's still your turn")
+
+                if current_player.get_color() == "White":
+                    if self.check_coordinates((x - 1, y - 1)) == opposed_player.get_color:
+                        if self.check_coordinates((x - 2, y - 2)) is None:
+                            return print(f"{piece_taken_mess} and {x3_king_message}. It's still your turn")
+
+                    elif self.check_coordinates((x + 1, y - 1)) == opposed_player.get_color:
+                        if self.check_coordinates((x + 2, y - 2)) is None:
+                            return print(f"{piece_taken_mess} and {x3_king_message}. It's still your turn")
+
+                    # No more pieces to jump
+                    else:
+                        self.game_turn += 1
+                        return print(f"{piece_taken_mess} and {x3_king_message}")
+
+        if piece_taken:
+            # check if there are more pieces to take
+            if self.check_coordinates((x - 1, y + 1)) == opposed_player.get_color:
+                if self.check_coordinates((x - 2, y + 2)) is None:
+                    return print(f"{piece_taken_mess}. It's still your turn")
+
+            elif self.check_coordinates((x + 1, y + 1)) == opposed_player.get_color:
+                if self.check_coordinates((x + 2, y + 2)) is None:
+                    return print(f"{piece_taken_mess}. It's still your turn")
+
+            elif self.check_coordinates((x - 1, y - 1)) == opposed_player.get_color:
+                if self.check_coordinates((x - 2, y - 2)) is None:
+                    return print(f"{piece_taken_mess}. It's still your turn")
+
+            elif self.check_coordinates((x + 1, y - 1)) == opposed_player.get_color:
+                if self.check_coordinates((x + 2, y - 2)) is None:
+                    return print(f"{piece_taken_mess}. It's still your turn")
+
+                # No more pieces to jump
+                else:
+                    self.game_turn += 1
+                    return print(f"{piece_taken_mess} and your piece is now at {destination_location}")
+
+        # Condition Change only
+        if condition_change:
+            # Normal to king
+            if current_piece.get_condition() == 0:
+                current_piece.condition_change()
+                self.game_turn += 1
+                return print(f"{king_message}")
+
+            # King to Triple King
+            elif current_piece.get_condition == 1:
+                current_piece.condition_change()
+                self.game_turn += 1
+                return print(f"{x3_king_message}")
+
+        # No pieces taken and no condition change
+        if not piece_taken and not condition_change:
+            self.game_turn += 1
+            return print(f"your piece is now at {destination_location}")
 
     def get_checker_details(self, location: tuple):
         """
         This method will return information on piece color and King or Triple King status for the given checker piece
         :param location: a tuple to tell the method where the piece to be checked is located
         """
-        return checker_color  #check color based on player
-        pass
+        x, y = location
+        if x > 7 or y > 7:
+            raise InvalidSquare("This square doesn't exist")
+        if x < 0 or y < 0:
+            raise InvalidSquare("This square doesn't exist")
 
-        # needs to return if king or triple king
+        for players in self._players:
+            for pieces in players.get_pieces_list():
+                if pieces.get_location == location:
+                    info_piece = pieces
+
+                    if info_piece.get_color() == "Black":
+                        if info_piece.get_condition == 0:
+                            return print("Black")
+                        elif info_piece.get_condition == 1:
+                            return print("Black_King")
+                        elif info_piece.get_condition == 2:
+                            return print("Black_Triple_King")
+
+                    elif info_piece.get_color() == "White":
+                        if info_piece.get_condition == 0:
+                            return print("White")
+                        elif info_piece.get_condition == 1:
+                            return print("White_King")
+                        elif info_piece.get_condition == 2:
+                            return print("White_Triple_King")
 
     def game_winner(self):
         """
         This method will either return the winner of the game or if the game hasn't ended yet, it will indicate so
         """
-        # needs to return the game winner or if the game is still going return that
-        pass
+        for players in self._players:
+            if players.get_captured_pieces_count == 12:
+                name = players.get_name()
+                return print(f"{name}")
+            else:
+                return print("Game has not ended")
 
 
 class Player:
@@ -322,13 +570,37 @@ class Player:
                 pieces_list.append(Piece(piece_color, (i, 7)))
                 pieces_list.append(Piece(piece_color, (i, 5)))
 
+    def piece_captured(self):
+        """
+        This method adds 1 to the Players captured pieces attribute every time they capture a piece
+        """
+        self._captured_pieces += 1
+
+    def remove_piece(self, r_piece):
+        """
+        When the other player jumps over the player's piece, this method removes the piece from their piece list
+        """
+        piece_list = self._pieces
+        for pieces in piece_list:
+            if r_piece == pieces:
+                piece_list.remove(r_piece)
+
     def get_pieces_list(self):
+        """
+        This method will return the pieces list for the given player
+        """
         return self._pieces
 
     def get_name(self):
+        """
+        This method will return the name parameter for the given Player object
+        """
         return self._player_name
 
     def get_color(self):
+        """
+        This method will return the color for the given player object
+        """
         return self._piece_color
 
     def get_king_count(self):
@@ -337,7 +609,7 @@ class Player:
         """
         king_count = 0
         for pieces in self._pieces:
-            if pieces.king_counts() == 1:
+            if pieces.get_condition() == 1:
                 king_count += 1
         return king_count
 
@@ -348,7 +620,7 @@ class Player:
         """
         trip_king_count = 0
         for pieces in self._pieces:
-            if pieces.king_counts() == 2:
+            if pieces.get_condition == 2:
                 trip_king_count += 1
         return trip_king_count
 
@@ -362,6 +634,10 @@ class Player:
 game = Checkers()
 p1 = game.create_player("Dan", "Black")
 p2 = game.create_player("Darcie", "White")
+game.play_game("Dan", (0,2), (1,3))
+game.play_game("Darcie", (1,5), (2,4))
+game.play_game("Dan", (2,2), (3,3))
+game.play_game("Darcie", (2,4), (0,2))
 game.print_board()
 
 
