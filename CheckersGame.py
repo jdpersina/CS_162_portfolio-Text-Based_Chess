@@ -10,7 +10,7 @@ class InvalidPlayer(Exception):
     pass
 
 
-class OutOfTurn(Exception):
+class OutofTurn(Exception):
     """
     Exception to raise when player attempts a move out of turn
     """
@@ -177,13 +177,13 @@ class Checkers:
         player_color_comparison = current_player.get_color()
         while self.game_turn % 2 != 0:
             if player_color_comparison == "White":
-                raise OutOfTurn("It's not your turn!")
+                raise OutofTurn("It's not your turn!")
             else:
                 break
 
         while self.game_turn % 2 == 0:
             if player_color_comparison == "Black":
-                raise OutOfTurn("It's not your turn!")
+                raise OutofTurn("It's not your turn!")
             else:
                 break
 
